@@ -1,1 +1,4 @@
 *.vscode
+
+data/train_scaled.npy
+data/val_scaled.npy

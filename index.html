@@ -587,9 +587,9 @@ async function loadNpy(path) {
 async function loadReplayData() {
   if (replayData) return replayData;
   const [testScaled, actuals, predictions] = await Promise.all([
-    loadNpy('./test_scaled.npy'),
-    loadNpy('./actuals.npy'),
-    loadNpy('./predictions.npy')
+    loadNpy('./data/test_scaled.npy'),
+    loadNpy('./data/actuals.npy'),
+    loadNpy('./data/predictions.npy')
   ]);
 
   if (testScaled.shape[1] !== FEATURE_COUNT) throw new Error('test_scaled.npy must have 6 features');
