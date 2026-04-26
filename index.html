@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BTC Price Forecasting — Arber Zylyftari</title>
+<title>BTC Price Forecasting | Arber Zylyftari</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -79,37 +79,47 @@
   .status-dot{width:8px;height:8px;border-radius:50%;background:var(--muted);display:inline-block;margin-right:.4rem}
   .status-dot.live{background:#22c55e;box-shadow:0 0 6px #22c55e;animation:pulse 2s infinite}
   .status-dot.loading{background:var(--amber);animation:pulse 1s infinite}
+  .status-dot.warning{background:var(--amber)}
   .status-dot.error{background:#ef4444}
   @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
   .predict-body{padding:2rem}
   .predict-current{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border);border-radius:8px;overflow:hidden;margin-bottom:2rem}
   .predict-stat{background:var(--bg3);padding:1.5rem}
   .predict-stat-label{font-family:var(--mono);font-size:.65rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.5rem}
-  .predict-stat-value{font-size:2rem;font-weight:800;letter-spacing:-.02em}
+  .predict-stat-value{font-size:clamp(1.4rem,3.8vw,2rem);font-weight:800;letter-spacing:0;line-height:1.05;overflow-wrap:anywhere}
   .predict-stat-value.amber{color:var(--amber)}
   .predict-stat-sub{font-family:var(--mono);font-size:.65rem;color:var(--muted);margin-top:.3rem}
   .predict-btn-wrap{display:flex;gap:1rem;align-items:center;flex-wrap:wrap}
   .btn-predict{background:var(--amber);color:#0a0a0a;font-weight:700;padding:1rem 2.5rem;font-family:var(--mono);font-size:.85rem;border:none;border-radius:6px;cursor:pointer;transition:all .2s;letter-spacing:.05em}
+  .btn-predict.secondary{background:transparent;color:var(--amber);border:1px solid var(--amber-border)}
   .btn-predict:hover:not(:disabled){background:var(--amber2);transform:translateY(-2px);box-shadow:0 8px 24px rgba(245,158,11,.35)}
+  .btn-predict.secondary:hover:not(:disabled){background:var(--amber-dim);box-shadow:none}
   .btn-predict:disabled{opacity:.5;cursor:not-allowed;transform:none}
   .predict-hint{font-family:var(--mono);font-size:.7rem;color:var(--muted)}
+  .replay-controls{display:flex;gap:1rem;align-items:flex-end;flex-wrap:wrap;margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border)}
+  .replay-field{display:flex;flex-direction:column;gap:.35rem}
+  .replay-field label{font-family:var(--mono);font-size:.65rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase}
+  .replay-field input{background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:var(--mono);font-size:.8rem;padding:.85rem 1rem;color-scheme:dark}
+  .replay-field input:focus{outline:none;border-color:var(--amber-border)}
   .progress-wrap{margin-top:1.5rem;display:none}
   .progress-wrap.visible{display:block}
   .progress-label{font-family:var(--mono);font-size:.7rem;color:var(--muted);margin-bottom:.5rem}
   .progress-bar{height:3px;background:var(--border);border-radius:2px;overflow:hidden}
   .progress-fill{height:100%;background:var(--amber);border-radius:2px;width:0%;transition:width .4s ease}
+  .predict-warning{margin-top:1.5rem;padding:1rem 1.5rem;background:rgba(245,158,11,.1);border:1px solid var(--amber-border);border-radius:6px;font-family:var(--mono);font-size:.75rem;color:var(--amber);display:none}
+  .predict-warning.visible{display:block}
   .predict-result{margin-top:2rem;padding:2rem;border:1px solid var(--amber-border);border-radius:8px;background:var(--amber-dim);display:none}
   .predict-result.visible{display:block;animation:fadeUp .5s forwards}
-  .predict-result-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1.5rem;margin-top:1rem}
+  .predict-result-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.5rem;margin-top:1rem}
   .pr-label{font-family:var(--mono);font-size:.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.4rem}
-  .pr-value{font-size:1.6rem;font-weight:800;letter-spacing:-.02em}
+  .pr-value{font-size:clamp(1.15rem,2.4vw,1.6rem);font-weight:800;letter-spacing:0;line-height:1.1;overflow-wrap:anywhere}
   .pr-sub{font-family:var(--mono);font-size:.65rem;color:var(--muted);margin-top:.2rem}
   .mini-chart-wrap{margin-top:1.5rem}
   .mini-chart-label{font-family:var(--mono);font-size:.65rem;color:var(--muted);margin-bottom:.5rem;letter-spacing:.08em}
   .predict-error{margin-top:1.5rem;padding:1rem 1.5rem;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);border-radius:6px;font-family:var(--mono);font-size:.75rem;color:#ef4444;display:none}
   .predict-error.visible{display:block}
 
-  .method-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1.5rem}
+  .method-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1.5rem}
   .method-card{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:2rem;transition:border-color .2s,transform .2s}
   .method-card:hover{border-color:var(--amber-border);transform:translateY(-4px)}
   .method-num{font-family:var(--mono);font-size:.65rem;color:var(--amber);letter-spacing:.15em;margin-bottom:1rem}
@@ -156,7 +166,8 @@
   @keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
   .reveal{opacity:0;transform:translateY(24px);transition:opacity .7s,transform .7s}
   .reveal.visible{opacity:1;transform:translateY(0)}
-  @media(max-width:768px){nav{padding:1rem 1.5rem}.nav-links{display:none}section{padding:4rem 1.5rem}.hero{padding:7rem 1.5rem 4rem}footer{flex-direction:column;padding:2rem 1.5rem}.divider{margin:0 1.5rem}.predict-current{grid-template-columns:1fr}}
+  @media(max-width:1100px){.method-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  @media(max-width:768px){nav{padding:1rem 1.5rem}.nav-links{display:none}section{padding:4rem 1.5rem}.hero{padding:7rem 1.5rem 4rem}footer{flex-direction:column;padding:2rem 1.5rem}.divider{margin:0 1.5rem}.predict-current,.method-grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -165,7 +176,7 @@
   <a class="nav-logo" href="#">₿ BTC_FORECASTING</a>
   <ul class="nav-links">
     <li><a href="#results">Results</a></li>
-    <li><a href="#predict">Live Prediction</a></li>
+    <li><a href="#predict">Replay Demo</a></li>
     <li><a href="#charts">Charts</a></li>
     <li><a href="#methodology">Methodology</a></li>
     <li><a href="#architecture">Model</a></li>
@@ -181,7 +192,7 @@
   <p class="hero-sub">A stacked LSTM neural network trained on 698,400 minutes of Coinbase BTC/USD data to predict closing price one minute into the future, achieving a mean absolute error of <strong style="color:var(--amber)">$38.44</strong> on a $6,933 asset.</p>
   <div class="hero-cta">
     <a class="btn btn-primary" href="https://github.com/arberzylyftari/btc-price-forecasting" target="_blank">View on GitHub</a>
-    <a class="btn btn-ghost" href="#predict">Try Live Prediction</a>
+    <a class="btn btn-ghost" href="#predict">Try Replay Demo</a>
   </div>
   <div class="ticker-wrap">
     <div class="ticker">
@@ -210,7 +221,7 @@
 <section id="results">
   <p class="section-label reveal">Performance</p>
   <h2 class="section-title reveal">Final Results</h2>
-  <p class="section-desc reveal">Evaluated on held-out test data from June–August 2018 — a period the model never encountered during training or validation.</p>
+  <p class="section-desc reveal">Evaluated on held-out test data from June-August 2018, a period the model never encountered during training or validation.</p>
   <div class="results-grid reveal">
     <div class="result-card"><p class="result-label">Test MAE (USD)</p><p class="result-value">$38.44</p><p class="result-sub">mean absolute error</p></div>
     <div class="result-card"><p class="result-label">Mean Error</p><p class="result-value">$31.16</p><p class="result-sub">systematic bias</p></div>
@@ -223,10 +234,10 @@
     <table>
       <thead><tr><th>Run</th><th>MAE (USD)</th><th>Change made</th></tr></thead>
       <tbody>
-        <tr><td>Run 1</td><td>$608.41</td><td>Distribution shift — test set covered the 2018 crash</td></tr>
-        <tr><td>Run 2</td><td>$91.79</td><td>2-layer LSTM — fixed splits, stable price regime</td></tr>
+        <tr><td>Run 1</td><td>$608.41</td><td>Distribution shift during the 2018 crash</td></tr>
+        <tr><td>Run 2</td><td>$91.79</td><td>2-layer LSTM with fixed splits and stable price regime</td></tr>
         <tr><td>Run 3</td><td class="amber">$32.68</td><td>3-layer LSTM + AdamW + ReduceLROnPlateau</td></tr>
-        <tr><td>Run 4 (final)</td><td class="amber">$38.44</td><td>Retrain after session loss — consistent result</td></tr>
+        <tr><td>Run 4 (final)</td><td class="amber">$38.44</td><td>Retrain after session loss with consistent result</td></tr>
       </tbody>
     </table>
   </div>
@@ -236,51 +247,58 @@
 
 <section class="predict-section" id="predict">
   <p class="section-label reveal">Interactive</p>
-  <h2 class="section-title reveal">Live Prediction</h2>
-  <p class="section-desc reveal">Runs the actual trained LSTM model in your browser using TensorFlow.js. Fetches the last 1,440 minutes of real BTC/USDT data from Binance, preprocesses it identically to the training pipeline, and predicts the next-minute close price.</p>
+  <h2 class="section-title reveal">Historical Replay</h2>
+  <p class="section-desc reveal">Runs the actual trained LSTM model in your browser using TensorFlow.js on held-out 2018 test windows. Each replay hides the next minute, asks the model to predict it, then reveals the real candle from the test set.</p>
 
   <div class="predict-card reveal">
     <div class="predict-header">
       <div>
-        <h3>BTC/USDT · 1-Minute Ahead Forecast</h3>
-        <p><span class="status-dot" id="statusDot"></span><span id="statusText">Click predict to load model and fetch live data</span></p>
+        <h3>BTC/USD · Held-Out Test Replay</h3>
+        <p><span class="status-dot" id="statusDot"></span><span id="statusText">Click replay to load model and test data</span></p>
       </div>
       <div style="font-family:var(--mono);font-size:.7rem;color:var(--muted);text-align:right">Model: LSTM 128→64→32<br>Window: 1,440 steps (24h)</div>
     </div>
     <div class="predict-body">
       <div class="predict-current">
         <div class="predict-stat">
-          <p class="predict-stat-label">Current BTC Price</p>
-          <p class="predict-stat-value amber" id="currentPrice">—</p>
-          <p class="predict-stat-sub" id="priceChange">Waiting for data</p>
+          <p class="predict-stat-label">Replay Current Close</p>
+          <p class="predict-stat-value amber" id="currentPrice">...</p>
+          <p class="predict-stat-sub" id="priceChange">Held-out test window</p>
         </div>
         <div class="predict-stat">
           <p class="predict-stat-label">Predicted Next Minute</p>
-          <p class="predict-stat-value" id="predictedPrice" style="color:var(--muted)">—</p>
+          <p class="predict-stat-value" id="predictedPrice" style="color:var(--muted)">...</p>
           <p class="predict-stat-sub" id="predictDelta">Model not run yet</p>
         </div>
       </div>
       <div class="predict-btn-wrap">
-        <button class="btn-predict" id="predictBtn" onclick="runPrediction()">▶ Run Prediction</button>
-        <span class="predict-hint" id="predictHint">Loads ~8MB model · Takes 15–40s in browser</span>
+        <button class="btn-predict" id="predictBtn" onclick="runPrediction()">▶ Run Replay</button>
+        <span class="predict-hint" id="predictHint">Loads model + 2018 test artifact · Runs in browser</span>
+      </div>
+      <div class="replay-controls">
+        <div class="replay-field">
+          <label for="replayDateTime">Test target time (UTC)</label>
+          <input type="datetime-local" id="replayDateTime" step="300">
+        </div>
+        <button class="btn-predict secondary" id="selectedPredictBtn" onclick="runSelectedPrediction()">Run Selected Time</button>
       </div>
       <div class="progress-wrap" id="progressWrap">
         <p class="progress-label" id="progressLabel">Loading model...</p>
         <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
       </div>
+      <div class="predict-warning" id="predictWarning"></div>
       <div class="predict-result" id="predictResult">
-        <p style="font-family:var(--mono);font-size:.7rem;color:var(--amber);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.5rem">Prediction complete</p>
+        <p id="resultLabel" style="font-family:var(--mono);font-size:.7rem;color:var(--amber);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.5rem">Replay complete</p>
         <div class="predict-result-grid">
-          <div><p class="pr-label">Current Close</p><p class="pr-value amber" id="resCurrentPrice">—</p><p class="pr-sub">latest 1-min candle</p></div>
-          <div><p class="pr-label">Predicted Next</p><p class="pr-value" id="resPredicted" style="color:#22c55e">—</p><p class="pr-sub">1 minute ahead</p></div>
-          <div><p class="pr-label">Expected Change</p><p class="pr-value" id="resDelta">—</p><p class="pr-sub" id="resDeltaSub">vs current</p></div>
-          <div><p class="pr-label">Confidence Range</p><p class="pr-value" id="resRange" style="font-size:1.1rem;color:var(--muted)">—</p><p class="pr-sub">±$38 MAE bound</p></div>
+          <div><p class="pr-label">Current Close</p><p class="pr-value amber" id="resCurrentPrice">...</p><p class="pr-sub">latest 1-min candle</p></div>
+          <div><p class="pr-label">Predicted Next</p><p class="pr-value" id="resPredicted" style="color:#22c55e">...</p><p class="pr-sub">1 minute ahead</p></div>
+          <div><p class="pr-label">Prediction Error</p><p class="pr-value" id="resDelta">...</p><p class="pr-sub" id="resDeltaSub">vs actual target</p></div>
+          <div><p class="pr-label">Actual Next</p><p class="pr-value" id="resRange" style="font-size:1.1rem;color:var(--muted)">...</p><p class="pr-sub" id="resRangeSub">held-out target</p></div>
         </div>
         <div class="mini-chart-wrap">
-          <p class="mini-chart-label">LAST 60 MINUTES + PREDICTION</p>
+          <p class="mini-chart-label" id="miniChartLabel">TEST WINDOW + HIDDEN NEXT CANDLE</p>
           <canvas id="miniChart" height="120"></canvas>
         </div>
-        <p style="font-family:var(--mono);font-size:.65rem;color:var(--muted);margin-top:1rem">Prediction at <span id="predTimestamp">—</span> · Model trained on 2017–2018 Coinbase data · Not financial advice</p>
       </div>
       <div class="predict-error" id="predictError"></div>
     </div>
@@ -292,10 +310,10 @@
 <section class="chart-section" id="charts">
   <p class="section-label reveal">Visualisation</p>
   <h2 class="section-title reveal">Training Results</h2>
-  <p class="section-desc reveal">The model tracks real BTC price movements with high fidelity across the June–August 2018 test window, including a sharp intra-period correction.</p>
+  <p class="section-desc reveal">The model tracks real BTC price movements with high fidelity across the June-August 2018 test window, including a sharp intra-period correction.</p>
   <div class="chart-container reveal">
     <div class="chart-header">
-      <span class="chart-title-sm">BTC/USD CLOSE PRICE — TEST SET (REPRESENTATIVE SAMPLE)</span>
+      <span class="chart-title-sm">BTC/USD CLOSE PRICE: TEST SET SAMPLE</span>
       <div class="chart-legend">
         <div class="legend-item"><div class="legend-dot" style="background:#38bdf8"></div>Actual</div>
         <div class="legend-item"><div class="legend-dot" style="background:#f59e0b"></div>Predicted</div>
@@ -306,7 +324,7 @@
   <br>
   <div class="chart-container reveal">
     <div class="chart-header">
-      <span class="chart-title-sm">TRAINING & VALIDATION LOSS (MSE — LOG SCALE)</span>
+      <span class="chart-title-sm">TRAINING & VALIDATION LOSS: MSE LOG SCALE</span>
       <div class="chart-legend">
         <div class="legend-item"><div class="legend-dot" style="background:#38bdf8"></div>Train</div>
         <div class="legend-item"><div class="legend-dot" style="background:#f59e0b"></div>Validation</div>
@@ -323,12 +341,12 @@
   <h2 class="section-title reveal">Methodology</h2>
   <p class="section-desc reveal">Each preprocessing decision is documented and justified by exploratory analysis conducted in Notebook 1 before any transformation was applied.</p>
   <div class="method-grid">
-    <div class="method-card reveal"><p class="method-num">01 — DATA AUDIT</p><h3 class="method-title">Missing Data Analysis</h3><p class="method-desc">109,069 rows (5.19%) have all values as NaN — inactive trading windows, not corrupted data. A further 58,354 timestamps are absent from the CSV entirely, discovered only after reindexing to a complete 60-second DatetimeIndex.</p><div class="method-tags"><span class="tag">109,069 NaN rows</span><span class="tag">58,354 missing timestamps</span><span class="tag">forward-fill</span></div></div>
-    <div class="method-card reveal"><p class="method-num">02 — TRIMMING</p><h3 class="method-title">Remove Early Sparse Data</h3><p class="method-desc">The longest consecutive gap spans 38.4 hours, concentrated in 2014–2016. Forward-filling across such gaps produces 2,303 identical rows — a flat line the model would learn as a genuine price signal. Trimming to 2017-01-01 eliminates all such artifacts.</p><div class="method-tags"><span class="tag">38.4h max gap</span><span class="tag">trim to 2017</span><span class="tag">artifact removal</span></div></div>
-    <div class="method-card reveal"><p class="method-num">03 — FEATURES</p><h3 class="method-title">Feature Engineering</h3><p class="method-desc">Open, High, Low and Weighted_Price are all correlated ≥ 0.999 with Close — pure redundancy. Volume_(BTC) is retained after log₁p transform as the only independent feature (corr = 0.15). Time is encoded as sin/cos cyclic features to preserve periodicity.</p><div class="method-tags"><span class="tag">6 features</span><span class="tag">log₁p volume</span><span class="tag">cyclic encoding</span></div></div>
-    <div class="method-card reveal"><p class="method-num">04 — SPLITTING</p><h3 class="method-title">Chronological Split</h3><p class="method-desc">All three splits fall within the 2017–2018 bull market regime to ensure consistent price distribution. No shuffling is applied — shuffling a time series leaks future price information into training.</p><div class="method-tags"><span class="tag">train 2017-01 → 2018-05</span><span class="tag">val May–Jun 2018</span><span class="tag">test Jun–Aug 2018</span></div></div>
-    <div class="method-card reveal"><p class="method-num">05 — SCALING</p><h3 class="method-title">Leakage-Free Normalisation</h3><p class="method-desc">MinMaxScaler is fitted exclusively on training data. Fitting on the full dataset would leak validation and test price ranges into training — the model would indirectly know future price levels before seeing them.</p><div class="method-tags"><span class="tag">MinMaxScaler</span><span class="tag">fit on train only</span><span class="tag">no leakage</span></div></div>
-    <div class="method-card reveal"><p class="method-num">06 — PIPELINE</p><h3 class="method-title">tf.data Streaming</h3><p class="method-desc">tf.data.Dataset streams sliding windows with shift=5 — one window every 5 minutes. Pre-computing 698,000 windows of shape (1440, 6) would require ~27GB of RAM. Streaming keeps memory usage under 2GB throughout training.</p><div class="method-tags"><span class="tag">tf.data</span><span class="tag">shift=5</span><span class="tag">memory efficient</span></div></div>
+    <div class="method-card reveal"><p class="method-num">01 DATA AUDIT</p><h3 class="method-title">Missing Data Analysis</h3><p class="method-desc">109,069 rows (5.19%) have all values as NaN, inactive trading windows, not corrupted data. A further 58,354 timestamps are absent from the CSV entirely, discovered only after reindexing to a complete 60-second DatetimeIndex.</p><div class="method-tags"><span class="tag">109,069 NaN rows</span><span class="tag">58,354 missing timestamps</span><span class="tag">forward-fill</span></div></div>
+    <div class="method-card reveal"><p class="method-num">02 TRIMMING</p><h3 class="method-title">Remove Early Sparse Data</h3><p class="method-desc">The longest consecutive gap spans 38.4 hours, concentrated in 2014-2016. Forward-filling across such gaps produces 2,303 identical rows, a flat line the model would learn as a genuine price signal. Trimming to 2017-01-01 eliminates all such artifacts.</p><div class="method-tags"><span class="tag">38.4h max gap</span><span class="tag">trim to 2017</span><span class="tag">artifact removal</span></div></div>
+    <div class="method-card reveal"><p class="method-num">03 FEATURES</p><h3 class="method-title">Feature Engineering</h3><p class="method-desc">Open, High, Low and Weighted_Price are all correlated ≥ 0.999 with Close, making them redundant. Volume_(BTC) is retained after log₁p transform as the only independent feature (corr = 0.15). Time is encoded as sin/cos cyclic features to preserve periodicity.</p><div class="method-tags"><span class="tag">6 features</span><span class="tag">log₁p volume</span><span class="tag">cyclic encoding</span></div></div>
+    <div class="method-card reveal"><p class="method-num">04 SPLITTING</p><h3 class="method-title">Chronological Split</h3><p class="method-desc">All three splits fall within the 2017-2018 bull market regime to ensure consistent price distribution. No shuffling is applied because shuffling a time series leaks future price information into training.</p><div class="method-tags"><span class="tag">train 2017-01 → 2018-05</span><span class="tag">val May-Jun 2018</span><span class="tag">test Jun-Aug 2018</span></div></div>
+    <div class="method-card reveal"><p class="method-num">05 SCALING</p><h3 class="method-title">Leakage-Free Normalisation</h3><p class="method-desc">MinMaxScaler is fitted exclusively on training data. Fitting on the full dataset would leak validation and test price ranges into training, letting the model indirectly know future price levels before seeing them.</p><div class="method-tags"><span class="tag">MinMaxScaler</span><span class="tag">fit on train only</span><span class="tag">no leakage</span></div></div>
+    <div class="method-card reveal"><p class="method-num">06 PIPELINE</p><h3 class="method-title">tf.data Streaming</h3><p class="method-desc">tf.data.Dataset streams sliding windows with shift=5, one window every 5 minutes. Pre-computing 698,000 windows of shape (1440, 6) would require ~27GB of RAM. Streaming keeps memory usage under 2GB throughout training.</p><div class="method-tags"><span class="tag">tf.data</span><span class="tag">shift=5</span><span class="tag">memory efficient</span></div></div>
   </div>
 </section>
 
@@ -387,7 +405,7 @@
       <div class="code-tab" onclick="showTab('preprocess',this)">Preprocessing</div>
     </div>
     <div class="code-content active" id="tab-pipeline">
-<pre><span class="cm"># Streaming sliding windows — no RAM crash</span>
+<pre><span class="cm"># Streaming sliding windows - no RAM crash</span>
 <span class="kw">def</span> <span class="fn">make_dataset</span>(data, shuffle=<span class="kw">False</span>):
     total_length = WINDOW_SIZE + HORIZON
     ds = tf.data.Dataset.<span class="fn">from_tensor_slices</span>(data)
@@ -434,7 +452,7 @@ hour = df.index.hour + df.index.minute / <span class="nm">60.0</span>
 df[<span class="st">'hour_sin'</span>] = np.<span class="fn">sin</span>(<span class="nm">2</span> * np.pi * hour / <span class="nm">24</span>)
 df[<span class="st">'hour_cos'</span>] = np.<span class="fn">cos</span>(<span class="nm">2</span> * np.pi * hour / <span class="nm">24</span>)
 
-<span class="cm"># Fit scaler on train only — no leakage</span>
+<span class="cm"># Fit scaler on train only - no leakage</span>
 scaler = <span class="fn">MinMaxScaler</span>()
 train_scaled = scaler.<span class="fn">fit_transform</span>(train_df.values)
 val_scaled   = scaler.<span class="fn">transform</span>(val_df.values)</pre>
@@ -445,7 +463,7 @@ val_scaled   = scaler.<span class="fn">transform</span>(val_df.values)</pre>
 <div class="divider"></div>
 
 <footer>
-  <div class="footer-left">Built by <span>Arber Zylyftari</span> — Holberton School</div>
+  <div class="footer-left">Built by <span>Arber Zylyftari</span>, Holberton School</div>
   <div class="footer-links">
     <a href="https://github.com/arberzylyftari/btc-price-forecasting" target="_blank">GitHub</a>
     <a href="#top">Back to top ↑</a>
@@ -458,8 +476,14 @@ val_scaled   = scaler.<span class="fn">transform</span>(val_df.values)</pre>
 const SCALER_MIN = [0.06, 7.999999680000017e-08, -1.0, -1.0, -0.9749279121818236, -0.9009688679024191];
 const SCALER_MAX = [19891.99, 7.053861751757449, 1.0, 1.0, 0.9749279121818236, 1.0];
 const WINDOW_SIZE = 1440;
+const FEATURE_COUNT = 6;
+const TEST_SHIFT = 5;
+const TEST_START_MS = Date.UTC(2018, 5, 1, 0, 0, 0);
+const TEST_TARGET_START_MS = TEST_START_MS + WINDOW_SIZE * 60 * 1000;
+const TEST_TARGET_END_MS = Date.UTC(2018, 6, 31, 23, 55, 0);
 const MAE_USD = 38.44;
 let tfModel = null;
+let replayData = null;
 let miniChartInstance = null;
 
 const obs = new IntersectionObserver(e => e.forEach(x => { if(x.isIntersecting) x.target.classList.add('visible'); }), {threshold:0.1});
@@ -479,72 +503,211 @@ function showProgress(v) { document.getElementById('progressWrap').classList.tog
 function setStatus(t, txt) { const d = document.getElementById('statusDot'); d.className = 'status-dot'+(t?' '+t:''); document.getElementById('statusText').textContent = txt; }
 function showError(m) { const e = document.getElementById('predictError'); e.textContent = '⚠ '+m; e.classList.add('visible'); }
 function hideError() { document.getElementById('predictError').classList.remove('visible'); }
+function showWarning(m) { const e = document.getElementById('predictWarning'); e.textContent = m; e.classList.add('visible'); }
+function hideWarning() { document.getElementById('predictWarning').classList.remove('visible'); }
 function fmt(n) { return '$'+Number(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}); }
-
-async function fetchCandles() {
-  const r = await fetch('https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1m&limit=1441');
-  if (!r.ok) throw new Error('Binance API returned '+r.status);
-  const d = await r.json();
-  return d.map(x => ({ ts: x[0], close: parseFloat(x[4]), vol: parseFloat(x[5]) }));
+function fmtSigned(n) { return (n>=0?'+':'-')+'$'+Math.abs(n).toFixed(2); }
+function fmtReplayTime(ms) {
+  return new Date(ms).toLocaleString('en-US', {
+    month:'short', day:'numeric', year:'numeric',
+    hour:'numeric', minute:'2-digit', hour12:false, timeZone:'UTC'
+  })+' UTC';
 }
 
-function buildMatrix(candles) {
-  return candles.map(c => {
-    const dt = new Date(c.ts);
-    const h  = dt.getUTCHours() + dt.getUTCMinutes()/60;
-    const dw = dt.getUTCDay();
-    const vl = Math.log1p(c.vol);
-    const hs = Math.sin(2*Math.PI*h/24);
-    const hc = Math.cos(2*Math.PI*h/24);
-    const ds = Math.sin(2*Math.PI*dw/7);
-    const dc = Math.cos(2*Math.PI*dw/7);
-    return [scale(c.close,0), scale(vl,1), scale(hs,2), scale(hc,3), scale(ds,4), scale(dc,5)];
+function toDatetimeInputValue(ms) {
+  const d = new Date(ms);
+  const pad = n => String(n).padStart(2, '0');
+  return `${d.getUTCFullYear()}-${pad(d.getUTCMonth()+1)}-${pad(d.getUTCDate())}T${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())}`;
+}
+
+function selectedReplayTimeMs() {
+  const value = document.getElementById('replayDateTime').value;
+  if (!value) throw new Error('Choose a test target time first');
+  const [datePart, timePart] = value.split('T');
+  const [year, month, day] = datePart.split('-').map(Number);
+  const [hour, minute] = timePart.split(':').map(Number);
+  return Date.UTC(year, month - 1, day, hour, minute, 0);
+}
+
+function sampleIndexFromTargetMs(targetMs, sampleCount) {
+  if (targetMs < TEST_TARGET_START_MS || targetMs > TEST_TARGET_END_MS) {
+    throw new Error(`Choose a UTC time from ${fmtReplayTime(TEST_TARGET_START_MS)} to ${fmtReplayTime(TEST_TARGET_END_MS)}`);
+  }
+  const minutesFromFirstTarget = Math.round((targetMs - TEST_TARGET_START_MS) / 60000);
+  const sampleIndex = Math.round(minutesFromFirstTarget / TEST_SHIFT);
+  return Math.max(0, Math.min(sampleCount - 1, sampleIndex));
+}
+
+function setReplayButtonsDisabled(disabled) {
+  document.getElementById('predictBtn').disabled = disabled;
+  document.getElementById('selectedPredictBtn').disabled = disabled;
+}
+
+function initReplayControls() {
+  const input = document.getElementById('replayDateTime');
+  input.min = toDatetimeInputValue(TEST_TARGET_START_MS);
+  input.max = toDatetimeInputValue(TEST_TARGET_END_MS);
+  input.value = toDatetimeInputValue(Date.UTC(2018, 5, 15, 12, 0, 0));
+}
+
+function parseNpy(buffer) {
+  const bytes = new Uint8Array(buffer);
+  const magic = String.fromCharCode(...bytes.slice(0, 6));
+  if (magic !== '\x93NUMPY') throw new Error('Invalid .npy file');
+
+  const view = new DataView(buffer);
+  const major = bytes[6];
+  const headerStart = major === 1 ? 10 : 12;
+  const headerLength = major === 1 ? view.getUint16(8, true) : view.getUint32(8, true);
+  const header = new TextDecoder().decode(bytes.slice(headerStart, headerStart + headerLength));
+  const descr = /['"]descr['"]:\s*['"]([^'"]+)['"]/.exec(header)?.[1];
+  const fortranOrder = /['"]fortran_order['"]:\s*(True|False)/.exec(header)?.[1] === 'True';
+  const shapeText = /['"]shape['"]:\s*\(([^)]*)\)/.exec(header)?.[1];
+  if (!descr || !shapeText) throw new Error('Unsupported .npy header');
+
+  const shape = shapeText.split(',').map(x => parseInt(x.trim(), 10)).filter(Number.isFinite);
+  const count = shape.reduce((a, b) => a * b, 1);
+  const dataStart = headerStart + headerLength;
+  const dataBuffer = buffer.slice(dataStart);
+
+  let data;
+  if (descr.endsWith('f8')) data = new Float64Array(dataBuffer, 0, count);
+  else if (descr.endsWith('f4')) data = new Float32Array(dataBuffer, 0, count);
+  else throw new Error('Unsupported .npy dtype: '+descr);
+
+  return { data, shape, fortranOrder };
+}
+
+async function loadNpy(path) {
+  const r = await fetch(path);
+  if (!r.ok) throw new Error(`${path} returned ${r.status}`);
+  return parseNpy(await r.arrayBuffer());
+}
+
+async function loadReplayData() {
+  if (replayData) return replayData;
+  const [testScaled, actuals, predictions] = await Promise.all([
+    loadNpy('./test_scaled.npy'),
+    loadNpy('./actuals.npy'),
+    loadNpy('./predictions.npy')
+  ]);
+
+  if (testScaled.shape[1] !== FEATURE_COUNT) throw new Error('test_scaled.npy must have 6 features');
+  if (actuals.shape[0] !== predictions.shape[0]) throw new Error('actuals.npy and predictions.npy length mismatch');
+
+  replayData = { testScaled, actuals, predictions };
+  return replayData;
+}
+
+function scaledClose(rowIndex) {
+  return npyValue(replayData.testScaled, rowIndex, 0);
+}
+
+function npyValue(npy, row, col = 0) {
+  if (npy.shape.length === 1) return npy.data[row];
+  const rows = npy.shape[0];
+  const cols = npy.shape[1];
+  return npy.fortranOrder ? npy.data[row + col * rows] : npy.data[row * cols + col];
+}
+
+function buildReplayTensor(sampleIndex) {
+  const startRow = sampleIndex * TEST_SHIFT;
+  const input = new Float32Array(WINDOW_SIZE * FEATURE_COUNT);
+  for (let row = 0; row < WINDOW_SIZE; row++) {
+    for (let col = 0; col < FEATURE_COUNT; col++) {
+      input[row * FEATURE_COUNT + col] = npyValue(replayData.testScaled, startRow + row, col);
+    }
+  }
+  return tf.tensor3d(input, [1, WINDOW_SIZE, FEATURE_COUNT]);
+}
+
+function renderMiniChart(sampleIndex, predicted, actual) {
+  const targetRow = sampleIndex * TEST_SHIFT + WINDOW_SIZE;
+  const startRow = targetRow - 60;
+  const history = Array.from({length:60}, (_, i) => unscaleClose(scaledClose(startRow + i)));
+  const labels = history.map((_, i) => i===59 ? 'now' : '-'+(59-i)+'m');
+  labels.push('+1m');
+
+  const datasets = [{
+    data:history,
+    borderColor:'#38bdf8',
+    borderWidth:1.5,
+    pointRadius:0,
+    tension:0.3
+  }, {
+    data:[...Array(60).fill(null), predicted],
+    borderColor:'#f59e0b',
+    borderWidth:0,
+    pointRadius:Array(60).fill(0).concat([6]),
+    pointBackgroundColor:'#f59e0b',
+    tension:0
+  }, {
+    data:[...Array(60).fill(null), actual],
+    borderColor:'#22c55e',
+    borderWidth:0,
+    pointRadius:Array(60).fill(0).concat([5]),
+    pointBackgroundColor:'#22c55e',
+    tension:0
+  }];
+
+  if (miniChartInstance) miniChartInstance.destroy();
+  miniChartInstance = new Chart(document.getElementById('miniChart').getContext('2d'), {
+    type:'line',
+    data:{labels,datasets},
+    options:{responsive:true,plugins:{legend:{display:false}},scales:{
+      x:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#555550',font:{family:'Space Mono',size:9},maxTicksLimit:8}},
+      y:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#555550',font:{family:'Space Mono',size:9},callback:v=>'$'+v.toLocaleString()}}
+    }}
   });
 }
 
-async function runPrediction() {
-  const btn = document.getElementById('predictBtn');
-  btn.disabled = true;
+async function runPrediction(targetMs = null) {
+  setReplayButtonsDisabled(true);
   hideError();
+  hideWarning();
   document.getElementById('predictResult').classList.remove('visible');
   try {
+    setStatus('loading','Loading held-out test replay...');
+    showProgress(true);
+    setProgress(8,'Loading test_scaled.npy, actuals.npy, predictions.npy...');
+    const data = await loadReplayData();
+
     if (!tfModel) {
       setStatus('loading','Loading model weights...');
-      showProgress(true);
-      setProgress(5,'Initialising TensorFlow.js...');
+      setProgress(35,'Initialising TensorFlow.js...');
       await tf.ready();
-      setProgress(15,'Loading model.json...');
+      setProgress(45,'Loading model.json...');
       tfModel = await tf.loadLayersModel('./tfjs_model/model.json', {
-        onProgress: f => setProgress(15+Math.round(f*55), `Loading weights... ${Math.round(f*100)}%`)
+        onProgress: f => setProgress(45+Math.round(f*30), `Loading weights... ${Math.round(f*100)}%`)
       });
-      setProgress(72,'Warming up...');
+      setProgress(80,'Warming up...');
       const w = tf.zeros([1,WINDOW_SIZE,6]); tfModel.predict(w).dispose(); w.dispose();
-      setProgress(82,'Fetching live data...');
     } else {
-      setStatus('loading','Fetching live BTC data...');
-      showProgress(true);
-      setProgress(82,'Fetching live BTC data from Binance...');
+      setProgress(80,'Using cached model and test data...');
     }
 
-    const candles = await fetchCandles();
-    if (candles.length < WINDOW_SIZE+1) throw new Error('Insufficient candle data');
+    const sampleIndex = targetMs === null
+      ? Math.floor(Math.random() * data.actuals.data.length)
+      : sampleIndexFromTargetMs(targetMs, data.actuals.data.length);
+    const targetRow = sampleIndex * TEST_SHIFT + WINDOW_SIZE;
+    const currentRow = targetRow - 1;
+    const previousRow = targetRow - 2;
+    const currentPrice = unscaleClose(scaledClose(currentRow));
+    const previousPrice = unscaleClose(scaledClose(previousRow));
+    const actualNext = data.actuals.data[sampleIndex];
+    const savedPrediction = data.predictions.data[sampleIndex];
+    const targetTime = TEST_START_MS + targetRow * 60 * 1000;
+    const delta1m = currentPrice - previousPrice;
 
-    const inputCandles = candles.slice(candles.length - WINDOW_SIZE - 1, candles.length - 1);
-    const cur = candles[candles.length-1];
-    const prev = candles[candles.length-2];
-    const curPrice = cur.close;
-    const delta1m = curPrice - prev.close;
-
-    document.getElementById('currentPrice').textContent = fmt(curPrice);
+    document.getElementById('currentPrice').textContent = fmt(currentPrice);
     const chEl = document.getElementById('priceChange');
-    chEl.textContent = (delta1m>=0?'+':'')+'$'+delta1m.toFixed(2)+' last minute';
+    chEl.textContent = `${fmtReplayTime(targetTime - 60000)} input close · ${fmtSigned(delta1m)} last minute`;
     chEl.style.color = delta1m>=0?'#22c55e':'#ef4444';
 
-    setProgress(90,'Running LSTM inference...');
+    setProgress(90,'Running LSTM inference on hidden 2018 window...');
     setStatus('loading','Running model inference...');
 
-    const mat = buildMatrix(inputCandles);
-    const inp = tf.tensor3d([mat],[1,WINDOW_SIZE,6]);
+    const inp = buildReplayTensor(sampleIndex);
     const out = tfModel.predict(inp);
     const scaled = (await out.data())[0];
     const predicted = unscaleClose(scaled);
@@ -552,56 +715,54 @@ async function runPrediction() {
 
     setProgress(100,'Done');
     showProgress(false);
-    setStatus('live','Prediction complete · '+new Date().toLocaleTimeString());
+    setStatus('live','Replay complete · '+fmtReplayTime(targetTime));
 
-    const delta = predicted - curPrice;
-    const pct = ((delta/curPrice)*100).toFixed(3);
-    const dStr = (delta>=0?'+':'')+'$'+Math.abs(delta).toFixed(2);
+    const error = predicted - actualNext;
+    const absError = Math.abs(error);
+    const pctError = ((absError / actualNext) * 100).toFixed(3);
+    const errorColor = absError <= MAE_USD ? '#22c55e' : absError <= MAE_USD * 2 ? '#f59e0b' : '#ef4444';
+    const predMove = predicted - currentPrice;
 
     document.getElementById('predictedPrice').textContent = fmt(predicted);
-    document.getElementById('predictedPrice').style.color = delta>=0?'#22c55e':'#ef4444';
-    document.getElementById('predictDelta').textContent = dStr+' ('+(delta>=0?'+':'')+pct+'%)';
-    document.getElementById('resCurrentPrice').textContent = fmt(curPrice);
+    document.getElementById('predictedPrice').style.color = predMove>=0?'#22c55e':'#ef4444';
+    document.getElementById('predictDelta').textContent = `${fmtSigned(predMove)} vs current · ${fmtSigned(error)} error`;
+    document.getElementById('resCurrentPrice').textContent = fmt(currentPrice);
     document.getElementById('resPredicted').textContent = fmt(predicted);
-    document.getElementById('resPredicted').style.color = delta>=0?'#22c55e':'#ef4444';
-    document.getElementById('resDelta').textContent = dStr;
-    document.getElementById('resDelta').style.color = delta>=0?'#22c55e':'#ef4444';
-    document.getElementById('resDeltaSub').textContent = (delta>=0?'+':'')+pct+'% vs current';
-    document.getElementById('resRange').textContent = '$'+(predicted-MAE_USD).toFixed(0)+' – $'+(predicted+MAE_USD).toFixed(0);
-    document.getElementById('predTimestamp').textContent = new Date().toLocaleString();
+    document.getElementById('resPredicted').style.color = predMove>=0?'#22c55e':'#ef4444';
+    document.getElementById('resDelta').textContent = fmtSigned(error);
+    document.getElementById('resDelta').style.color = errorColor;
+    document.getElementById('resDeltaSub').textContent = `${pctError}% absolute error`;
+    document.getElementById('resRange').textContent = fmt(actualNext);
+    document.getElementById('resRangeSub').textContent = 'held-out target';
+    document.getElementById('resultLabel').textContent = 'Replay complete';
+    document.getElementById('miniChartLabel').textContent = 'LAST 60 MINUTES + PREDICTION + ACTUAL';
 
-    const last60 = candles.slice(candles.length-60);
-    const labels = last60.map((_,i) => i===59?'now':'-'+(59-i)+'m');
-    labels.push('+1m');
-    const actPrices = last60.map(c => c.close);
-    const predLine  = [...Array(60).fill(null), predicted];
-    const ptRadius  = Array(60).fill(0).concat([6]);
-
-    if (miniChartInstance) miniChartInstance.destroy();
-    miniChartInstance = new Chart(document.getElementById('miniChart').getContext('2d'), {
-      type:'line',
-      data:{labels,datasets:[
-        {data:actPrices,borderColor:'#38bdf8',borderWidth:1.5,pointRadius:0,tension:0.3},
-        {data:predLine,borderColor:'#f59e0b',borderWidth:2,pointRadius:ptRadius,pointBackgroundColor:'#f59e0b',borderDash:[4,3],tension:0}
-      ]},
-      options:{responsive:true,plugins:{legend:{display:false}},scales:{
-        x:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#555550',font:{family:'Space Mono',size:9},maxTicksLimit:8}},
-        y:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#555550',font:{family:'Space Mono',size:9},callback:v=>'$'+v.toLocaleString()}}
-      }}
-    });
+    renderMiniChart(sampleIndex, predicted, actualNext);
 
     document.getElementById('predictResult').classList.add('visible');
     document.getElementById('predictResult').scrollIntoView({behavior:'smooth',block:'nearest'});
-    document.getElementById('predictHint').textContent = 'Model cached — next run will be faster';
+    document.getElementById('predictHint').textContent = `${targetMs === null ? 'Random' : 'Selected'} replay ${fmtReplayTime(targetTime)} · saved eval pred ${fmt(savedPrediction)}`;
   } catch(err) {
     showProgress(false);
-    setStatus('error','Error — see below');
+    setStatus('error','Error: see below');
     showError(err.message || 'Unknown error. Check browser console.');
     console.error(err);
   } finally {
-    btn.disabled = false;
+    setReplayButtonsDisabled(false);
   }
 }
+
+function runSelectedPrediction() {
+  try {
+    runPrediction(selectedReplayTimeMs());
+  } catch (err) {
+    hideWarning();
+    setStatus('error','Error: see below');
+    showError(err.message || 'Choose a valid test target time.');
+  }
+}
+
+initReplayControls();
 
 // Static training charts
 const n=200; const act=[], pred2=[];
