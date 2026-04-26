@@ -4,7 +4,7 @@ A deep learning project that uses a stacked LSTM neural network to forecast
 Bitcoin closing prices one minute into the future, trained on four years of
 Coinbase BTC/USD historical trade data.
 
-**Live demo:** https://arberzylyftari.github.io/btc-price-forecasting
+**Live demo:** btc-price-forecasting-arberzylyftari.vercel.app
 
 ## Results
 
