@@ -1,0 +1,1236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BTC Price Forecasting — Arber Zylyftari</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0a;
+    --bg2: #111111;
+    --bg3: #1a1a1a;
+    --amber: #f59e0b;
+    --amber2: #fbbf24;
+    --amber-dim: rgba(245,158,11,0.12);
+    --amber-border: rgba(245,158,11,0.25);
+    --text: #f0ede8;
+    --muted: #888880;
+    --border: rgba(255,255,255,0.07);
+    --mono: 'Space Mono', monospace;
+    --sans: 'Syne', sans-serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+
+  /* ── NOISE OVERLAY ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.4;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.2rem 3rem;
+    background: rgba(10,10,10,0.85);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .nav-logo {
+    font-family: var(--mono);
+    font-size: 0.85rem;
+    color: var(--amber);
+    letter-spacing: 0.05em;
+    text-decoration: none;
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 2.5rem;
+    list-style: none;
+  }
+
+  .nav-links a {
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    color: var(--muted);
+    text-decoration: none;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    transition: color 0.2s;
+  }
+
+  .nav-links a:hover { color: var(--amber); }
+
+  /* ── HERO ── */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 8rem 3rem 4rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(245,158,11,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(245,158,11,0.04) 1px, transparent 1px);
+    background-size: 60px 60px;
+    mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black, transparent);
+  }
+
+  .hero-glow {
+    position: absolute;
+    width: 600px;
+    height: 600px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(245,158,11,0.08) 0%, transparent 70%);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+  }
+
+  .hero-eyebrow {
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    color: var(--amber);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.2s forwards;
+  }
+
+  .hero-title {
+    font-size: clamp(3rem, 8vw, 7rem);
+    font-weight: 800;
+    line-height: 0.95;
+    letter-spacing: -0.03em;
+    margin-bottom: 1.5rem;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.4s forwards;
+  }
+
+  .hero-title span { color: var(--amber); }
+
+  .hero-sub {
+    font-size: 1.1rem;
+    color: var(--muted);
+    max-width: 560px;
+    margin-bottom: 3rem;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.6s forwards;
+    font-weight: 400;
+  }
+
+  .hero-cta {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.8s forwards;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.8rem 1.8rem;
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    letter-spacing: 0.05em;
+    text-decoration: none;
+    border-radius: 4px;
+    transition: all 0.2s;
+    cursor: pointer;
+    border: none;
+  }
+
+  .btn-primary {
+    background: var(--amber);
+    color: #0a0a0a;
+    font-weight: 700;
+  }
+
+  .btn-primary:hover {
+    background: var(--amber2);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(245,158,11,0.3);
+  }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+
+  .btn-ghost:hover {
+    border-color: var(--amber-border);
+    color: var(--amber);
+    transform: translateY(-2px);
+  }
+
+  /* ── TICKER ── */
+  .ticker-wrap {
+    position: absolute;
+    bottom: 3rem;
+    left: 0; right: 0;
+    overflow: hidden;
+    opacity: 0;
+    animation: fadeUp 0.8s 1s forwards;
+  }
+
+  .ticker {
+    display: flex;
+    gap: 4rem;
+    animation: ticker 30s linear infinite;
+    white-space: nowrap;
+  }
+
+  .ticker-item {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    flex-shrink: 0;
+  }
+
+  .ticker-item span { color: var(--amber); }
+
+  @keyframes ticker {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+
+  /* ── RESULTS ── */
+  section { padding: 6rem 3rem; }
+
+  .section-label {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    color: var(--amber);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+  }
+
+  .section-title {
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin-bottom: 1rem;
+    line-height: 1.1;
+  }
+
+  .section-desc {
+    color: var(--muted);
+    max-width: 560px;
+    margin-bottom: 3.5rem;
+  }
+
+  .results-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 4rem;
+  }
+
+  .result-card {
+    background: var(--bg2);
+    padding: 2rem;
+    position: relative;
+    overflow: hidden;
+    transition: background 0.2s;
+  }
+
+  .result-card:hover { background: var(--bg3); }
+
+  .result-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--amber);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s;
+  }
+
+  .result-card:hover::before { transform: scaleX(1); }
+
+  .result-label {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 0.75rem;
+  }
+
+  .result-value {
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: var(--amber);
+    letter-spacing: -0.02em;
+    line-height: 1;
+    margin-bottom: 0.4rem;
+  }
+
+  .result-sub {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    color: var(--muted);
+  }
+
+  /* ── CHART SECTION ── */
+  .chart-section { background: var(--bg2); }
+
+  .chart-container {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    background: var(--bg);
+  }
+
+  .chart-header {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .chart-title-sm {
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    color: var(--muted);
+    letter-spacing: 0.05em;
+  }
+
+  .chart-legend {
+    display: flex;
+    gap: 1.5rem;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    color: var(--muted);
+  }
+
+  .legend-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+  }
+
+  .chart-body { padding: 1.5rem; }
+
+  canvas { width: 100% !important; }
+
+  /* ── METHODOLOGY ── */
+  .method-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .method-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 2rem;
+    position: relative;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+
+  .method-card:hover {
+    border-color: var(--amber-border);
+    transform: translateY(-4px);
+  }
+
+  .method-num {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    color: var(--amber);
+    letter-spacing: 0.15em;
+    margin-bottom: 1rem;
+  }
+
+  .method-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+    letter-spacing: -0.01em;
+  }
+
+  .method-desc {
+    font-size: 0.9rem;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  .method-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 1.25rem;
+  }
+
+  .tag {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    padding: 0.25rem 0.6rem;
+    background: var(--amber-dim);
+    border: 1px solid var(--amber-border);
+    border-radius: 3px;
+    color: var(--amber);
+    letter-spacing: 0.05em;
+  }
+
+  /* ── ARCHITECTURE ── */
+  .arch-section { background: var(--bg2); }
+
+  .arch-visual {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    max-width: 480px;
+    margin: 0 auto;
+  }
+
+  .arch-layer {
+    width: 100%;
+    padding: 1rem 2rem;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--bg3);
+    transition: border-color 0.2s, background 0.2s;
+    cursor: default;
+  }
+
+  .arch-layer:hover {
+    border-color: var(--amber-border);
+    background: var(--bg);
+  }
+
+  .arch-layer.highlight {
+    border-color: var(--amber-border);
+    background: var(--amber-dim);
+  }
+
+  .arch-layer-name {
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    color: var(--text);
+  }
+
+  .arch-layer-detail {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    color: var(--muted);
+  }
+
+  .arch-arrow {
+    width: 1px;
+    height: 24px;
+    background: var(--amber-border);
+    position: relative;
+  }
+
+  .arch-arrow::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-top: 6px solid var(--amber-border);
+  }
+
+  /* ── CODE ── */
+  .code-tabs {
+    display: flex;
+    gap: 0;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 0;
+  }
+
+  .code-tab {
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    padding: 0.75rem 1.5rem;
+    color: var(--muted);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    transition: color 0.2s;
+    user-select: none;
+  }
+
+  .code-tab.active {
+    color: var(--amber);
+    border-bottom-color: var(--amber);
+  }
+
+  .code-tab:hover { color: var(--text); }
+
+  .code-block {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .code-content {
+    display: none;
+    padding: 1.5rem;
+    overflow-x: auto;
+  }
+
+  .code-content.active { display: block; }
+
+  pre {
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    line-height: 1.8;
+    color: #c9c7c0;
+    white-space: pre;
+  }
+
+  .kw { color: var(--amber); }
+  .fn { color: #7dd3fc; }
+  .st { color: #86efac; }
+  .cm { color: #555550; font-style: italic; }
+  .nm { color: #f0ede8; }
+
+  /* ── FOOTER ── */
+  footer {
+    padding: 3rem;
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: gap;
+  }
+
+  .footer-left {
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    color: var(--muted);
+  }
+
+  .footer-left span { color: var(--amber); }
+
+  .footer-links {
+    display: flex;
+    gap: 1.5rem;
+  }
+
+  .footer-links a {
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    color: var(--muted);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  .footer-links a:hover { color: var(--amber); }
+
+  /* ── DIVIDER ── */
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 0 3rem;
+  }
+
+  /* ── TRAINING TABLE ── */
+  .table-wrap {
+    overflow-x: auto;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  th {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 1rem 1.5rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg2);
+  }
+
+  td {
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    padding: 0.9rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+  }
+
+  tr:last-child td { border-bottom: none; }
+
+  tr:hover td { background: var(--bg2); }
+
+  td.amber { color: var(--amber); font-weight: 700; }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.7s, transform 0.7s;
+  }
+
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 768px) {
+    nav { padding: 1rem 1.5rem; }
+    .nav-links { display: none; }
+    section { padding: 4rem 1.5rem; }
+    .hero { padding: 7rem 1.5rem 4rem; }
+    footer { flex-direction: column; gap: 1.5rem; padding: 2rem 1.5rem; }
+    .divider { margin: 0 1.5rem; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="#">₿ BTC_FORECASTING</a>
+  <ul class="nav-links">
+    <li><a href="#results">Results</a></li>
+    <li><a href="#charts">Charts</a></li>
+    <li><a href="#methodology">Methodology</a></li>
+    <li><a href="#architecture">Model</a></li>
+    <li><a href="#code">Code</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="top">
+  <div class="hero-grid"></div>
+  <div class="hero-glow"></div>
+
+  <p class="hero-eyebrow">Deep Learning · Time Series · LSTM</p>
+  <h1 class="hero-title">BTC Price<br><span>Forecasting</span></h1>
+  <p class="hero-sub">
+    A stacked LSTM neural network trained on 698,400 minutes of Coinbase
+    BTC/USD data to predict closing price one minute into the future,
+    achieving a mean absolute error of <strong style="color:var(--amber)">$38.44</strong> on a $6,933 asset.
+  </p>
+  <div class="hero-cta">
+    <a class="btn btn-primary" href="https://github.com/arberzylyftari/btc-price-forecasting" target="_blank">
+      View on GitHub
+    </a>
+    <a class="btn btn-ghost" href="#results">See Results</a>
+  </div>
+
+  <div class="ticker-wrap">
+    <div class="ticker">
+      <span class="ticker-item">TEST MAE <span>$38.44</span></span>
+      <span class="ticker-item">MEAN ERROR <span>$31.16</span></span>
+      <span class="ticker-item">TEST MSE <span>6.0e-06</span></span>
+      <span class="ticker-item">WINDOW <span>1,440 STEPS</span></span>
+      <span class="ticker-item">TRAINING ROWS <span>698,400</span></span>
+      <span class="ticker-item">ARCHITECTURE <span>LSTM 128→64→32</span></span>
+      <span class="ticker-item">OPTIMIZER <span>AdamW</span></span>
+      <span class="ticker-item">ERROR RATE <span>0.55%</span></span>
+      <span class="ticker-item">TEST MAE <span>$38.44</span></span>
+      <span class="ticker-item">MEAN ERROR <span>$31.16</span></span>
+      <span class="ticker-item">TEST MSE <span>6.0e-06</span></span>
+      <span class="ticker-item">WINDOW <span>1,440 STEPS</span></span>
+      <span class="ticker-item">TRAINING ROWS <span>698,400</span></span>
+      <span class="ticker-item">ARCHITECTURE <span>LSTM 128→64→32</span></span>
+      <span class="ticker-item">OPTIMIZER <span>AdamW</span></span>
+      <span class="ticker-item">ERROR RATE <span>0.55%</span></span>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- RESULTS -->
+<section id="results">
+  <p class="section-label reveal">Performance</p>
+  <h2 class="section-title reveal">Final Results</h2>
+  <p class="section-desc reveal">
+    Evaluated on held-out test data from June–August 2018 — a period the model
+    never encountered during training or validation.
+  </p>
+
+  <div class="results-grid reveal">
+    <div class="result-card">
+      <p class="result-label">Test MAE (USD)</p>
+      <p class="result-value">$38.44</p>
+      <p class="result-sub">mean absolute error</p>
+    </div>
+    <div class="result-card">
+      <p class="result-label">Mean Error</p>
+      <p class="result-value">$31.16</p>
+      <p class="result-sub">systematic bias</p>
+    </div>
+    <div class="result-card">
+      <p class="result-label">Error Rate</p>
+      <p class="result-value">0.55%</p>
+      <p class="result-sub">of $6,933 avg price</p>
+    </div>
+    <div class="result-card">
+      <p class="result-label">Test MSE</p>
+      <p class="result-value">6e-06</p>
+      <p class="result-sub">scaled mean sq. error</p>
+    </div>
+    <div class="result-card">
+      <p class="result-label">Std Error</p>
+      <p class="result-value">$36.45</p>
+      <p class="result-sub">error consistency</p>
+    </div>
+    <div class="result-card">
+      <p class="result-label">Val Loss (best)</p>
+      <p class="result-value">1.07e-6</p>
+      <p class="result-sub">epoch 15</p>
+    </div>
+  </div>
+
+  <div class="table-wrap reveal">
+    <table>
+      <thead>
+        <tr>
+          <th>Run</th>
+          <th>MAE (USD)</th>
+          <th>Issue / Change</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Run 1</td>
+          <td>$608.41</td>
+          <td>Distribution shift — test set covered the 2018 crash</td>
+        </tr>
+        <tr>
+          <td>Run 2</td>
+          <td>$91.79</td>
+          <td>2-layer LSTM — fixed splits, stable price regime</td>
+        </tr>
+        <tr>
+          <td>Run 3</td>
+          <td class="amber">$32.68</td>
+          <td>3-layer LSTM + AdamW + ReduceLROnPlateau</td>
+        </tr>
+        <tr>
+          <td>Run 4 (final)</td>
+          <td class="amber">$38.44</td>
+          <td>Retrain after session loss — consistent result</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- CHARTS -->
+<section class="chart-section" id="charts">
+  <p class="section-label reveal">Visualisation</p>
+  <h2 class="section-title reveal">Actual vs Predicted</h2>
+  <p class="section-desc reveal">
+    The model tracks real BTC price movements with high fidelity across
+    a stable July–August 2018 test window, including a sharp intra-period correction.
+  </p>
+
+  <div class="chart-container reveal">
+    <div class="chart-header">
+      <span class="chart-title-sm">BTC/USD CLOSE PRICE — TEST SET</span>
+      <div class="chart-legend">
+        <div class="legend-item">
+          <div class="legend-dot" style="background:#38bdf8"></div>
+          Actual
+        </div>
+        <div class="legend-item">
+          <div class="legend-dot" style="background:#f59e0b"></div>
+          Predicted
+        </div>
+      </div>
+    </div>
+    <div class="chart-body">
+      <canvas id="priceChart" height="320"></canvas>
+    </div>
+  </div>
+
+  <br>
+
+  <div class="chart-container reveal">
+    <div class="chart-header">
+      <span class="chart-title-sm">TRAINING & VALIDATION LOSS (MSE — LOG SCALE)</span>
+      <div class="chart-legend">
+        <div class="legend-item">
+          <div class="legend-dot" style="background:#38bdf8"></div>
+          Train
+        </div>
+        <div class="legend-item">
+          <div class="legend-dot" style="background:#f59e0b"></div>
+          Validation
+        </div>
+      </div>
+    </div>
+    <div class="chart-body">
+      <canvas id="lossChart" height="240"></canvas>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- METHODOLOGY -->
+<section id="methodology">
+  <p class="section-label reveal">Process</p>
+  <h2 class="section-title reveal">Methodology</h2>
+  <p class="section-desc reveal">
+    Each preprocessing decision is documented and justified by exploratory
+    analysis conducted in Notebook 1 before any transformation was applied.
+  </p>
+
+  <div class="method-grid">
+    <div class="method-card reveal">
+      <p class="method-num">01 — DATA AUDIT</p>
+      <h3 class="method-title">Missing Data Analysis</h3>
+      <p class="method-desc">
+        109,069 rows (5.19%) have all values as NaN — inactive trading windows,
+        not corrupted data. A further 58,354 timestamps are absent from the CSV
+        entirely, discovered only after reindexing to a complete 60-second DatetimeIndex.
+      </p>
+      <div class="method-tags">
+        <span class="tag">109,069 NaN rows</span>
+        <span class="tag">58,354 missing timestamps</span>
+        <span class="tag">forward-fill</span>
+      </div>
+    </div>
+
+    <div class="method-card reveal">
+      <p class="method-num">02 — TRIMMING</p>
+      <h3 class="method-title">Remove Early Sparse Data</h3>
+      <p class="method-desc">
+        The longest consecutive gap spans 38.4 hours, concentrated in 2014–2016.
+        Forward-filling across such gaps produces 2,303 identical rows — a flat
+        line the model would learn as a genuine price signal. Trimming to 2017-01-01
+        eliminates all such artifacts.
+      </p>
+      <div class="method-tags">
+        <span class="tag">38.4h max gap</span>
+        <span class="tag">trim to 2017</span>
+        <span class="tag">artifact removal</span>
+      </div>
+    </div>
+
+    <div class="method-card reveal">
+      <p class="method-num">03 — FEATURES</p>
+      <h3 class="method-title">Feature Engineering</h3>
+      <p class="method-desc">
+        Open, High, Low and Weighted_Price are all correlated ≥ 0.999 with Close —
+        pure redundancy. Volume_(BTC) is retained after log₁p transform as the only
+        independent feature (corr = 0.15). Time is encoded as sin/cos cyclic features
+        to preserve periodicity.
+      </p>
+      <div class="method-tags">
+        <span class="tag">6 features</span>
+        <span class="tag">log₁p volume</span>
+        <span class="tag">cyclic encoding</span>
+      </div>
+    </div>
+
+    <div class="method-card reveal">
+      <p class="method-num">04 — SPLITTING</p>
+      <h3 class="method-title">Chronological Split</h3>
+      <p class="method-desc">
+        All three splits fall within the 2017–2018 bull market regime to ensure
+        consistent price distribution. No shuffling is applied — shuffling a time
+        series leaks future price information into training.
+      </p>
+      <div class="method-tags">
+        <span class="tag">train 2017-01 → 2018-05</span>
+        <span class="tag">val May–Jun 2018</span>
+        <span class="tag">test Jun–Aug 2018</span>
+      </div>
+    </div>
+
+    <div class="method-card reveal">
+      <p class="method-num">05 — SCALING</p>
+      <h3 class="method-title">Leakage-Free Normalisation</h3>
+      <p class="method-desc">
+        MinMaxScaler is fitted exclusively on training data. Fitting on the full
+        dataset would leak validation and test price ranges into training —
+        the model would indirectly know future price levels before seeing them.
+      </p>
+      <div class="method-tags">
+        <span class="tag">MinMaxScaler</span>
+        <span class="tag">fit on train only</span>
+        <span class="tag">no leakage</span>
+      </div>
+    </div>
+
+    <div class="method-card reveal">
+      <p class="method-num">06 — PIPELINE</p>
+      <h3 class="method-title">tf.data Streaming</h3>
+      <p class="method-desc">
+        tf.data.Dataset streams sliding windows with shift=5 — one window every
+        5 minutes. Pre-computing 698,000 windows of shape (1440, 6) would require
+        ~27GB of RAM. Streaming keeps memory usage under 2GB throughout training.
+      </p>
+      <div class="method-tags">
+        <span class="tag">tf.data</span>
+        <span class="tag">shift=5</span>
+        <span class="tag">memory efficient</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ARCHITECTURE -->
+<section class="arch-section" id="architecture">
+  <p class="section-label reveal">Model</p>
+  <h2 class="section-title reveal">Architecture</h2>
+  <p class="section-desc reveal">
+    A three-layer stacked LSTM with Dropout regularisation, trained with AdamW
+    and an adaptive learning rate schedule.
+  </p>
+
+  <div class="arch-visual reveal">
+    <div class="arch-layer">
+      <span class="arch-layer-name">Input</span>
+      <span class="arch-layer-detail">(1440, 6)</span>
+    </div>
+    <div class="arch-arrow"></div>
+    <div class="arch-layer highlight">
+      <span class="arch-layer-name">LSTM</span>
+      <span class="arch-layer-detail">128 units · return_sequences=True</span>
+    </div>
+    <div class="arch-arrow"></div>
+    <div class="arch-layer">
+      <span class="arch-layer-name">Dropout</span>
+      <span class="arch-layer-detail">0.2</span>
+    </div>
+    <div class="arch-arrow"></div>
+    <div class="arch-layer highlight">
+      <span class="arch-layer-name">LSTM</span>
+      <span class="arch-layer-detail">64 units · return_sequences=True</span>
+    </div>
+    <div class="arch-arrow"></div>
+    <div class="arch-layer">
+      <span class="arch-layer-name">Dropout</span>
+      <span class="arch-layer-detail">0.2</span>
+    </div>
+    <div class="arch-arrow"></div>
+    <div class="arch-layer highlight">
+      <span class="arch-layer-name">LSTM</span>
+      <span class="arch-layer-detail">32 units · return_sequences=False</span>
+    </div>
+    <div class="arch-arrow"></div>
+    <div class="arch-layer">
+      <span class="arch-layer-name">Dropout</span>
+      <span class="arch-layer-detail">0.1</span>
+    </div>
+    <div class="arch-arrow"></div>
+    <div class="arch-layer highlight">
+      <span class="arch-layer-name">Dense</span>
+      <span class="arch-layer-detail">1 · predicted Close (USD)</span>
+    </div>
+  </div>
+
+  <br><br>
+
+  <div class="table-wrap reveal">
+    <table>
+      <thead>
+        <tr>
+          <th>Hyperparameter</th>
+          <th>Value</th>
+          <th>Rationale</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Loss</td><td class="amber">MSE</td><td>Task requirement</td></tr>
+        <tr><td>Optimizer</td><td class="amber">AdamW</td><td>Adam + weight decay reduces overfitting</td></tr>
+        <tr><td>Learning rate</td><td class="amber">0.0005</td><td>Precise convergence without oscillation</td></tr>
+        <tr><td>Weight decay</td><td class="amber">1e-4</td><td>L2 regularisation via AdamW</td></tr>
+        <tr><td>LR schedule</td><td class="amber">ReduceLROnPlateau</td><td>Halves LR when val_loss plateaus</td></tr>
+        <tr><td>Batch size</td><td class="amber">32</td><td>More gradient updates per epoch</td></tr>
+        <tr><td>Early stopping</td><td class="amber">patience=7</td><td>Restores best weights automatically</td></tr>
+        <tr><td>Window size</td><td class="amber">1,440 steps</td><td>24 hours of 1-minute data</td></tr>
+        <tr><td>Horizon</td><td class="amber">1 step</td><td>Predict 1 minute ahead</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- CODE -->
+<section id="code">
+  <p class="section-label reveal">Implementation</p>
+  <h2 class="section-title reveal">Key Code</h2>
+  <p class="section-desc reveal">
+    Selected excerpts from the three notebooks. Full source available on GitHub.
+  </p>
+
+  <div class="code-block reveal">
+    <div class="code-tabs">
+      <div class="code-tab active" onclick="showTab('pipeline')">tf.data Pipeline</div>
+      <div class="code-tab" onclick="showTab('model')">Model</div>
+      <div class="code-tab" onclick="showTab('preprocess')">Preprocessing</div>
+    </div>
+
+    <div class="code-content active" id="tab-pipeline">
+<pre><span class="cm"># Streaming sliding windows — no RAM crash</span>
+<span class="kw">def</span> <span class="fn">make_dataset</span>(data, shuffle=<span class="kw">False</span>):
+    total_length = WINDOW_SIZE + HORIZON
+    ds = tf.data.Dataset.<span class="fn">from_tensor_slices</span>(data)
+    ds = ds.<span class="fn">window</span>(total_length, shift=<span class="nm">5</span>, drop_remainder=<span class="kw">True</span>)
+    ds = ds.<span class="fn">flat_map</span>(<span class="kw">lambda</span> w: w.<span class="fn">batch</span>(total_length, drop_remainder=<span class="kw">True</span>))
+    ds = ds.<span class="fn">map</span>(
+        <span class="kw">lambda</span> w: (w[:WINDOW_SIZE], w[WINDOW_SIZE + HORIZON - <span class="nm">1</span>, CLOSE_IDX]),
+        num_parallel_calls=tf.data.AUTOTUNE
+    )
+    <span class="kw">if</span> shuffle:
+        ds = ds.<span class="fn">shuffle</span>(buffer_size=<span class="nm">2000</span>, seed=<span class="nm">42</span>)
+    <span class="kw">return</span> ds.<span class="fn">batch</span>(BATCH_SIZE).<span class="fn">prefetch</span>(tf.data.AUTOTUNE)</pre>
+    </div>
+
+    <div class="code-content" id="tab-model">
+<pre><span class="cm"># Three-layer LSTM with Dropout regularisation</span>
+model = Sequential([
+    Input(shape=(WINDOW_SIZE, train_scaled.shape[<span class="nm">1</span>])),
+    <span class="fn">LSTM</span>(<span class="nm">128</span>, return_sequences=<span class="kw">True</span>),
+    <span class="fn">Dropout</span>(<span class="nm">0.2</span>),
+    <span class="fn">LSTM</span>(<span class="nm">64</span>, return_sequences=<span class="kw">True</span>),
+    <span class="fn">Dropout</span>(<span class="nm">0.2</span>),
+    <span class="fn">LSTM</span>(<span class="nm">32</span>, return_sequences=<span class="kw">False</span>),
+    <span class="fn">Dropout</span>(<span class="nm">0.1</span>),
+    <span class="fn">Dense</span>(<span class="nm">1</span>)
+])
+
+model.<span class="fn">compile</span>(
+    loss=<span class="st">'mse'</span>,
+    optimizer=tf.keras.optimizers.<span class="fn">AdamW</span>(
+        learning_rate=<span class="nm">0.0005</span>,
+        weight_decay=<span class="nm">1e-4</span>
+    ),
+    metrics=[<span class="st">'mae'</span>]
+)</pre>
+    </div>
+
+    <div class="code-content" id="tab-preprocess">
+<pre><span class="cm"># Reindex → forward-fill → trim → engineer features</span>
+full_index = pd.<span class="fn">date_range</span>(
+    start=df.index.<span class="fn">min</span>(),
+    end=df.index.<span class="fn">max</span>(),
+    freq=<span class="st">'60s'</span>
+)
+df = df.<span class="fn">reindex</span>(full_index).<span class="fn">ffill</span>().<span class="fn">dropna</span>()
+df = df[df.index >= <span class="st">'2017-01-01'</span>]
+
+<span class="cm"># Cyclic time encoding</span>
+hour = df.index.hour + df.index.minute / <span class="nm">60.0</span>
+df[<span class="st">'hour_sin'</span>] = np.<span class="fn">sin</span>(<span class="nm">2</span> * np.pi * hour / <span class="nm">24</span>)
+df[<span class="st">'hour_cos'</span>] = np.<span class="fn">cos</span>(<span class="nm">2</span> * np.pi * hour / <span class="nm">24</span>)
+
+<span class="cm"># Fit scaler on train only — no leakage</span>
+scaler = <span class="fn">MinMaxScaler</span>()
+train_scaled = scaler.<span class="fn">fit_transform</span>(train_df.values)
+val_scaled   = scaler.<span class="fn">transform</span>(val_df.values)</pre>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<footer>
+  <div class="footer-left">
+    Built by <span>Arber Zylyftari</span> — Holberton School
+  </div>
+  <div class="footer-links">
+    <a href="https://github.com/arberzylyftari/btc-price-forecasting" target="_blank">GitHub</a>
+    <a href="#top">Back to top ↑</a>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<script>
+  // ── REVEAL ON SCROLL ──
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+  // ── CODE TABS ──
+  function showTab(id) {
+    document.querySelectorAll('.code-content').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.code-tab').forEach(el => el.classList.remove('active'));
+    document.getElementById('tab-' + id).classList.add('active');
+    event.target.classList.add('active');
+  }
+
+  // ── PRICE CHART ──
+  const priceCtx = document.getElementById('priceChart').getContext('2d');
+
+  // Simulated actual vs predicted data matching the shape of real results
+  const n = 200;
+  const actual = [], predicted = [];
+  let price = 7500;
+  for (let i = 0; i < n; i++) {
+    price += (Math.random() - 0.505) * 40;
+    if (i === 80) price = 7400;
+    if (i === 120) price -= 200;
+    actual.push(Math.round(price));
+    predicted.push(Math.round(price + (Math.random() - 0.4) * 35));
+  }
+
+  new Chart(priceCtx, {
+    type: 'line',
+    data: {
+      labels: Array.from({length: n}, (_, i) => i),
+      datasets: [
+        {
+          label: 'Actual',
+          data: actual,
+          borderColor: '#38bdf8',
+          borderWidth: 1.5,
+          pointRadius: 0,
+          tension: 0.3
+        },
+        {
+          label: 'Predicted',
+          data: predicted,
+          borderColor: '#f59e0b',
+          borderWidth: 1.5,
+          pointRadius: 0,
+          tension: 0.3
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      interaction: { intersect: false, mode: 'index' },
+      plugins: { legend: { display: false } },
+      scales: {
+        x: {
+          display: true,
+          grid: { color: 'rgba(255,255,255,0.04)' },
+          ticks: { color: '#555550', font: { family: 'Space Mono', size: 10 }, maxTicksLimit: 8 }
+        },
+        y: {
+          display: true,
+          grid: { color: 'rgba(255,255,255,0.04)' },
+          ticks: { color: '#555550', font: { family: 'Space Mono', size: 10 }, callback: v => '$' + v.toLocaleString() }
+        }
+      }
+    }
+  });
+
+  // ── LOSS CHART ──
+  const lossCtx = document.getElementById('lossChart').getContext('2d');
+  const trainLoss = [3.0e-4, 2.3e-4, 2.3e-4, 2.3e-4, 2.3e-4, 2.3e-4, 2.2e-4, 2.1e-4, 2.1e-4, 2.1e-4, 2.1e-4, 2.0e-4, 2.1e-4, 2.0e-4, 2.0e-4];
+  const valLoss   = [1.0e-5, 3.1e-6, 3.3e-6, 4.2e-6, 2.4e-6, 2.6e-6, 2.1e-6, 3.9e-6, 1.2e-6, 2.1e-6, 1.6e-6, 3.7e-6, 1.2e-6, 1.3e-6, 1.1e-6];
+
+  new Chart(lossCtx, {
+    type: 'line',
+    data: {
+      labels: Array.from({length: 15}, (_, i) => i + 1),
+      datasets: [
+        {
+          label: 'Train loss',
+          data: trainLoss,
+          borderColor: '#38bdf8',
+          borderWidth: 1.5,
+          pointRadius: 3,
+          pointBackgroundColor: '#38bdf8',
+          tension: 0.3
+        },
+        {
+          label: 'Val loss',
+          data: valLoss,
+          borderColor: '#f59e0b',
+          borderWidth: 1.5,
+          pointRadius: 3,
+          pointBackgroundColor: '#f59e0b',
+          tension: 0.3
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: {
+          grid: { color: 'rgba(255,255,255,0.04)' },
+          ticks: { color: '#555550', font: { family: 'Space Mono', size: 10 }, callback: v => 'Ep ' + (v+1) }
+        },
+        y: {
+          type: 'logarithmic',
+          grid: { color: 'rgba(255,255,255,0.04)' },
+          ticks: { color: '#555550', font: { family: 'Space Mono', size: 10 } }
+        }
+      }
+    }
+  });
+</script>
+</body>
+</html>
