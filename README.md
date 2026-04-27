@@ -28,22 +28,17 @@ both the prediction and the actual next-minute price.
 
 ## Project Structure
 
-btc-price-forecasting/
-├── Notebooks/
-│   ├── 01_data_exploration.ipynb    - Dataset analysis and preprocessing decisions
-│   ├── 02_preprocessing.ipynb       - Data cleaning, feature engineering, scaling
-│   └── 03_model_training.ipynb      - Model architecture, training and evaluation
-├── tfjs_model/
-│   ├── model.json                   - TensorFlow.js model config
-│   └── group1-shard1of1.bin         - Model weights
-├── test_scaled.npy                  - Scaled test split (used by replay demo)
-├── actuals.npy                      - Held-out actual prices in USD
-├── predictions.npy                  - Model predictions in USD
-├── train_scaled.npy                 - Scaled training split
-├── val_scaled.npy                   - Scaled validation split
-├── scaler.pkl                       - Fitted MinMaxScaler
-├── index.html                       - Portfolio website with replay demo
-└── README.md
+| File | Description |
+|------|-------------|
+| `Notebooks/01_data_exploration.ipynb` | Dataset analysis and preprocessing decisions |
+| `Notebooks/02_preprocessing.ipynb` | Data cleaning, feature engineering, scaling |
+| `Notebooks/03_model_training.ipynb` | Model architecture, training and evaluation |
+| `tfjs_model/` | TensorFlow.js model for browser inference |
+| `data/actuals.npy` | Held-out actual prices in USD |
+| `data/predictions.npy` | Model predictions in USD |
+| `data/test_scaled.npy` | Scaled test split for replay demo |
+| `scaler.pkl` | Fitted MinMaxScaler |
+| `index.html` | Portfolio website with replay demo |
 
 ## Dataset
 
